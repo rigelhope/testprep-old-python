@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<UserRecord name="" created="">
+    <qbank (same as qbank data)>
+        <test renderdate="" complete="date" reviewed="date">
+            <question (same as from qbank)>
+                <history>
+                    <testattempt date="datetime">
+                        <viewstart date="datetime">
+                            <selection date="datetime" correct="true/false" id="">
+                        </viewstart>
+                    </testattempt>
+                    <missedreason>duh</missedreason>
+                </history>
+            </question>
+        </test>
+    </qbank>
+</UserRecord>
