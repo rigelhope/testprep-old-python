@@ -36,4 +36,8 @@ if __name__ == '__main__':
                         'tools.staticdir.dir': os.path.join(current_dir, 'static')
                         }}
 
+#uncomment to serve publicly
+#    cherrypy.config.update(
+#        {'server.socket_host': '0.0.0.0'})
+
     cherrypy.quickstart(Root(), '', config=conf)
