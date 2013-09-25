@@ -1,6 +1,7 @@
 import cherrypy
 from lxml import etree
 from lxml.builder import E
+import os.path
 
 class Root(object):
 
@@ -24,4 +25,12 @@ class Root(object):
         self._out.write(etree.tostring(self._xmlroot))
         self._out.close()               
 
-cherrypy.quickstart(Root())
+if __name__ == '__main__':
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    conf = {'/static': {'tools.staticdir.on': True,
+                        'tools.staticdir.dir': os.path.join(current_dir, 'static')
+                        }}
+
+
+cherrypy.quickstart(Root(), '', config=conf)
