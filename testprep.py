@@ -1,3 +1,5 @@
+#!/usr/bin/python2.7
+
 import cherrypy
 from lxml import etree
 from lxml.builder import E
@@ -5,10 +7,12 @@ import os.path
 
 class Root(object):
 
-    def __init__(self):
-        self._xmlsource = etree.parse(open('testdata.xml', 'rb'))
+    def __init__(self, 
+                    xmlfile='testdata.xml',
+                    xslfile='testview.xsl' ):
+        self._xmlsource = etree.parse(open(xmlfile, 'rb'))
         self._xmlroot = self._xmlsource.getroot()
-        self._transform = etree.XSLT(etree.parse(open('testview.xsl', 'rb')))
+        self._transform = etree.XSLT(etree.parse(open(xslfile, 'rb')))
         self.html = self._transform(self._xmlsource)
         
 
@@ -32,5 +36,4 @@ if __name__ == '__main__':
                         'tools.staticdir.dir': os.path.join(current_dir, 'static')
                         }}
 
-
-cherrypy.quickstart(Root(), '', config=conf)
+    cherrypy.quickstart(Root(), '', config=conf)
