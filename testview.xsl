@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     >
@@ -9,19 +8,56 @@
     <xsl:output method="html"/>
 
     <xsl:template match="/">
-        <!--header-->
-        <html><head><title>test.xml selection</title>
-         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<!--         <link rel="stylesheet" href="/resources/demos/style.css" />-->
-         <script type="text/javascript">
- $(function() {
- $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
- $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
- });
- </script>
- <style>
+<!--header-->
+<html><head><title>test.xml selection</title>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script type="text/javascript">
+    $(function() {
+         $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
+         $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
+     });
+</script>
+<script type="text/javascript">
+    $(document).ready(function ($) {
+        $('.explanation').hide();
+        $('.answer').hide();
+        var record = [];
+        record.push({
+            startview: Date.now(),
+        })
+        $('.showExplanation').click(function () {
+            $('.explanation').hide();
+            $(this).siblings('.explanation').show();
+            $(this).siblings().children('.explanation').show();
+            record.push({
+                showanswer: Date.now(),
+            })
+            console.log(record);
+            });
+        $('.selectah').click(function () {
+            $(this).siblings('.answer').addClass('explanation');
+            record.push({
+                question: $(this).attr('name'),
+                response: $(this).attr('id'),
+                datetime: Date.now(),
+            });
+        });
+        $('.sendRecord').click(function () {
+            record.push({
+                sent: Date.now(),
+            });
+            console.log(record);
+            $.ajax({
+                type: "POST",
+                url: "send",
+                data: JSON.stringify(record),
+            });
+        });
+    });
+</script>
+<style>
  .ui-tabs-vertical { width: 55em; }
  .ui-tabs-vertical .ui-tabs-nav { padding: .2em .1em .2em .2em; float: left; width: 12em; }
  .ui-tabs-vertical .ui-tabs-nav li { clear: left; width: 100%; border-bottom-width: 1px !important; border-right-width: 0 !important; margin: 0 -1px .2em 0; }
@@ -29,45 +65,6 @@
  .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active { padding-bottom: 0; padding-right: .1em; border-right-width: 1px; border-right-width: 1px; }
  .ui-tabs-vertical .ui-tabs-panel { padding: 1em; float: right; width: 40em;}
  </style>
-         <script type="text/javascript">
-$(document).ready(function ($) {
-    $('.explanation').hide();
-    $('.answer').hide();
-    var record = [];
-    record.push({
-        startview: Date.now(),
-    })
-    $('.showExplanation').click(function () {
-        $('.explanation').hide();
-        $(this).siblings('.explanation').show();
-        $(this).siblings().children('.explanation').show();
-        record.push({
-            showanswer: Date.now(),
-        })
-        console.log(record);
-        });
-    $('.selectah').click(function () {
-        $(this).siblings('.answer').addClass('explanation');
-        record.push({
-            question: $(this).attr('name'),
-            response: $(this).attr('id'),
-            datetime: Date.now(),
-        });
-    });
-    $('.sendRecord').click(function () {
-        record.push({
-            sent: Date.now(),
-        });
-        console.log(record);
-        $.ajax({
-            type: "POST",
-            url: "send",
-            data: JSON.stringify(record),
-        });
-    });
-});
-         </script>
-
         </head>
         <body>
         <xsl:apply-templates select="qbank" />
