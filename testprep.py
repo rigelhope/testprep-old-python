@@ -80,7 +80,6 @@ class Root(object):
             </body>
             </html>
             ''' % self.bank.subject_HTML(self.bank.get_subject_counts())
-#            ''' % self.bank.get_subject_counts()
 
     @cherrypy.expose
     def test(self):

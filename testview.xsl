@@ -10,15 +10,11 @@
     <xsl:template match="/">
 <!--header-->
 <html><head><title>test.xml selection</title>
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script type="text/javascript">
-    $(function() {
-         $( "#tabs" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-         $( "#tabs li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-     });
-</script>
+<link rel="stylesheet" href="static/jquery-ui.css" />
+<link rel="stylesheet" href="static/testprep.css" />
+<script src="static/jquery-1.9.1.js"></script>
+<script src="static/jquery-ui.js"></script>
+<script src="static/testprep-vertical-tabs.js" />
 <script type="text/javascript">
     $(document).ready(function ($) {
         $('.explanation').hide();
