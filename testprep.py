@@ -6,29 +6,45 @@ from lxml.builder import E
 import os.path
 import argparse
 
-class Root(object):
+class qbank(object):
+    
+    def __init__(self, xmlfile, xslfile): 
+        self._xml = self._load(xmlfile)
+        self._xslt = self._load(xslfile)
 
-    def __init__(self, 
-                    xmlfile='testdata.xml',
-                    xslfile='testview.xsl' ):
-        self._xmlsource = etree.parse(open(xmlfile, 'rb'))
-        self._xmlroot = self._xmlsource.getroot()
-        self._transform = etree.XSLT(etree.parse(open(xslfile, 'rb')))
-        self.html = self._transform(self._xmlsource)
-        
+    def _load(self, f):
+        source = etree.parse(open(f, 'rb'))
+        root = source.getroot()
+        return root
+
+    def transform(self):
+        transform = etree.XSLT(self._xslt)
+        return transform(self._xml)
+
+    def store(self, params):
+        h = E.history(str(params))
+        self._xml.append(h)
+        self._out = open('testhistory.xml', 'wb')
+        self._out.write(etree.tostring(self._xml))
+        self._out.close()               
+
+    def subset(self, selector='question/subject/text()'):
+        #TODO: implement subset selection using XPATH selectors
+        pass
+
+class Root(object):
+    def __init__(self, xmlfile='testdata.xml', xslfile='testview.xsl'):
+        self.bank = qbank(xmlfile, xslfile)
 
     @cherrypy.expose
     def index(self):
-        return str(self.html)
+        return str(self.bank.transform())
 
     @cherrypy.expose
     def send(self, **params):
         print params
-        h = E.history(str(params))
-        self._xmlroot.append(h)
-        self._out = open('testhistory.xml', 'wb')
-        self._out.write(etree.tostring(self._xmlroot))
-        self._out.close()               
+        self.bank.store(params)
+        
 
 if __name__ == '__main__':
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -43,7 +59,6 @@ if __name__ == '__main__':
                         'tools.staticdir.dir': os.path.join(current_dir, 'static')
                         }}
 
-#uncomment to serve publicly
     cherrypy.config.update(
         {'server.socket_host': args.public })
 
