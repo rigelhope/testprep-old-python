@@ -28,11 +28,14 @@ class qbank(object):
         self._out.write(etree.tostring(self._xml))
         self._out.close()               
 
-    def subset(self, root='//question', id='/@id', selector='/subject/text()'):
+    def subset(self, root='//question', id='@id', selector='subject/text()'):
         '''returns a dict where xpath values for id and selector are key and value, respectively'''
         subset = {}
-        for i in self._xml.xpath(root):
-            subset[i.xpath(id)[0]] = i.xpath(selector)[0]
+        try:
+            for i in self._xml.xpath(root):
+                subset[i.xpath(id)[0]] = i.xpath(selector)[0]
+        except IndexError:
+            subset = self._xml.xpath(root)
         return subset
 
     def counts(self, c):
@@ -45,6 +48,20 @@ class qbank(object):
             counts[i] = [id for id, subject in c.items() if subject == i]
         return counts
 
+    def get_subject_counts(self):
+        subj_counts = {}
+        subj = self.counts(self.subset())
+        for i in subj.keys():
+            subj_counts[i] = len(subj[i])
+        return subj_counts
+
+    def subject_HTML(self, counts):
+        HTML = ''
+        for i in counts.viewitems():
+            HTML += '''<input type="checkbox" name="select" value="%s" />%20s : %10s<br />
+            ''' % (i[0], i[0], i[1])
+        return HTML
+
 
 class Root(object):
     def __init__(self, xmlfile='testdata.xml', xslfile='testview.xsl'):
@@ -52,7 +69,18 @@ class Root(object):
 
     @cherrypy.expose
     def index(self):
-        pass
+        return '''
+            <html>
+            <body>
+            <table width="400" border="1">
+            <tr>
+            <td>%s</td>
+            </tr>
+            </table>
+            </body>
+            </html>
+            ''' % self.bank.subject_HTML(self.bank.get_subject_counts())
+#            ''' % self.bank.get_subject_counts()
 
     @cherrypy.expose
     def test(self):
