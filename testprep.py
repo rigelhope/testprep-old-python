@@ -28,9 +28,23 @@ class qbank(object):
         self._out.write(etree.tostring(self._xml))
         self._out.close()               
 
-    def subset(self, selector='question/subject/text()'):
-        #TODO: implement subset selection using XPATH selectors
-        pass
+    def subset(self, root='//question', id='/@id', selector='/subject/text()'):
+        '''returns a dict where xpath values for id and selector are key and value, respectively'''
+        subset = {}
+        for i in self._xml.xpath(root):
+            subset[i.xpath(id)[0]] = i.xpath(selector)[0]
+        return subset
+
+    def counts(self, c):
+        '''c is the dict to be counted
+        inverts a dict, value is a list of keys that had that value
+        used for finding subsets for e.g. subject selection'''
+        counts = {}
+        valueset = set(c.values())
+        for i in valueset:
+            counts[i] = [id for id, subject in c.items() if subject == i]
+        return counts
+
 
 class Root(object):
     def __init__(self, xmlfile='testdata.xml', xslfile='testview.xsl'):
@@ -38,6 +52,10 @@ class Root(object):
 
     @cherrypy.expose
     def index(self):
+        pass
+
+    @cherrypy.expose
+    def test(self):
         return str(self.bank.transform())
 
     @cherrypy.expose
