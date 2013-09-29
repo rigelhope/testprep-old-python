@@ -71,6 +71,10 @@ class Root(object):
     def index(self):
         return '''
             <html>
+            <head>
+            <link rel="stylesheet" href="static/jquery-ui.css" />
+            <link rel="stylesheet" href="static/testprep.css" />
+            </head>
             <body>
             <table width="400" border="1">
             <tr>
