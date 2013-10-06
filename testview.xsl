@@ -115,7 +115,7 @@
             </xsl:attribute>
             <xsl:attribute name="class">selectah</xsl:attribute>
         </xsl:element>
-        <xsl:value-of select="."/>
+        <xsl:value-of select="." disable-output-escaping="yes"/>
         <xsl:element name="img">
             <xsl:attribute name="src">
                 <xsl:choose>
