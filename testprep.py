@@ -165,8 +165,10 @@ if __name__ == '__main__':
     args = p.parse_args()
 
     conf = {'/static': {'tools.staticdir.on': True,
-                        'tools.staticdir.dir': os.path.join(current_dir, 'static')
-                        }}
+                        'tools.staticdir.dir': os.path.join(current_dir, 'static')},
+            '/media': {'tools.staticdir.on': True,
+                        'tools.staticdir.dir': os.path.join(current_dir, 'media')}
+            }
 
     cherrypy.config.update(
         {'server.socket_host': args.public })
