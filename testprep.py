@@ -5,38 +5,92 @@ from lxml import etree
 from lxml.builder import E
 import os.path
 import argparse
+import random
 
 class qbank(object):
+
+    max_qs = 50
     
     def __init__(self, xmlfile, xslfile): 
         self._xml = self._load(xmlfile)
         self._xslt = self._load(xslfile)
+        self._qids = self._get_list()
 
     def _load(self, f):
         source = etree.parse(open(f, 'rb'))
         root = source.getroot()
         return root
 
+    def _flatten(self, l):
+        '''flattens a list of lists l'''
+        return [i for sublist in l for i in sublist]
+
     def transform(self):
+        '''does the final xslt transformation to presentation format.
+        if there are too many questions to render easily (set by max_qs), it will use other methods to select a random subset, and render that.'''
+        if len(self._qids) > self.max_qs:
+            q = E.qbank()
+            for i in self.get_qs_from_ids(self.select_qids()):
+                q.append(i)
+        else:
+            q = self._xml
         transform = etree.XSLT(self._xslt)
-        return transform(self._xml)
+        return transform(q)
 
     def store(self, params):
+        '''writes accumulated selection/review data in raw JSON format. needs work.'''
         h = E.history(str(params))
         self._xml.append(h)
         self._out = open('testhistory.xml', 'wb')
         self._out.write(etree.tostring(self._xml))
         self._out.close()               
 
-    def subset(self, root='//question', id='@id', selector='subject/text()'):
-        '''returns a dict where xpath values for id and selector are key and value, respectively'''
+    def subset(self, value='subject/text()', key='@id', root='//question', source=None):
+        '''returns a dict using xpath selectors.
+        default values for key and value are id and selector , respectively'''
         subset = {}
+        if source == None:
+            source = self._xml
         try:
             for i in self._xml.xpath(root):
-                subset[i.xpath(id)[0]] = i.xpath(selector)[0]
+                subset[i.xpath(key)[0]] = i.xpath(value)[0]
         except IndexError:
             subset = self._xml.xpath(root)
         return subset
+
+    def _get_list(self, contents='@id', root='//question', source=None):
+
+        l=[]
+        if source == None:
+            source = self._xml
+        for i in source.xpath(root):
+            l.append(i.xpath(contents))
+        l = self._flatten(l)
+        return l
+
+    def select_qids(self, qty=None, qlist=None):
+        '''returns a random subset of list elements, presumably question ids'''
+        l = []
+        if qty == None:
+            qty = self.max_qs
+        if qlist == None:
+            qlist = self._qids
+        random.shuffle(qlist)
+        for i in range(qty):
+            l.append(qlist[i])
+        return l            
+
+    def get_qs_from_ids(self, qlist=None, selector='@id', root='//question', source=None):
+        '''returns list of questions as etree Elements based on the list of id's given'''
+        l = []
+        if qlist == None:
+            qlist = self._qids
+        if source == None:
+            source = self._xml
+        for i in qlist:
+            l.append(source.xpath(root+'['+selector+'='+str(i)+']'))
+        l = self._flatten(l)
+        return l
 
     def counts(self, c):
         '''c is the dict to be counted
@@ -56,6 +110,7 @@ class qbank(object):
         return subj_counts
 
     def subject_HTML(self, counts):
+        '''convenience function for rendering index page with checkbox selectors for each subject.'''
         HTML = ''
         for i in counts.viewitems():
             HTML += '''<input type="checkbox" name="select" value="%s" />%20s : %10s<br />
@@ -67,8 +122,10 @@ class Root(object):
     def __init__(self, xmlfile='testdata.xml', xslfile='testview.xsl'):
         self.bank = qbank(xmlfile, xslfile)
 
+
     @cherrypy.expose
-    def index(self):
+    def index(self, *data):
+        print data
         return '''
             <html>
             <head>
@@ -78,7 +135,10 @@ class Root(object):
             <body>
             <table width="400" border="1">
             <tr>
+            <form action="" method="post">
             <td>%s</td>
+            <td><input type="submit" value="Save"></td>
+            </form>
             </tr>
             </table>
             </body>
