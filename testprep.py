@@ -13,8 +13,33 @@ class qbank(object):
     
     def __init__(self, xmlfile, xslfile): 
         self._xml = self._load(xmlfile)
+        # store the original qbank here
+
         self._xslt = self._load(xslfile)
+        # the xsl for the presentation layer
+
         self._qids = self._get_list()
+        #the initial list of question ids from the qbank
+
+        self._test = self.make_test()
+        #init by random generation of a 50q test.
+        #this is what will be presented, if nothing else is changed
+
+    def make_test(self):
+        '''
+        generate a random test from the _qids list
+        _qids list is alterable to select questions fitting specific criteria, esp subject
+        this method may be called again to generate a new test
+        returns an etree Element, with a root of "qbank" and questions as sub-elements
+        '''
+        q = []
+        if len(self._qids) > self.max_qs:
+            q = E.qbank()
+            for i in self.get_qs_from_ids(self.select_qids()):
+                q.append(i)
+        else:
+            q = self._xml
+        return q
 
     def _load(self, f):
         source = etree.parse(open(f, 'rb'))
@@ -26,19 +51,16 @@ class qbank(object):
         return [i for sublist in l for i in sublist]
 
     def transform(self):
-        '''does the final xslt transformation to presentation format.
-        if there are too many questions to render easily (set by max_qs), it will use other methods to select a random subset, and render that.'''
-        if len(self._qids) > self.max_qs:
-            q = E.qbank()
-            for i in self.get_qs_from_ids(self.select_qids()):
-                q.append(i)
-        else:
-            q = self._xml
+        '''
+        does the final xslt transformation to presentation format.
+        '''
         transform = etree.XSLT(self._xslt)
-        return transform(q)
+        return transform(self._test)
 
     def store(self, params):
-        '''writes accumulated selection/review data in raw JSON format. needs work.'''
+        '''
+        writes accumulated selection/review data in raw JSON format. needs work.
+        '''
         h = E.history(str(params))
         self._xml.append(h)
         self._out = open('testhistory.xml', 'wb')
@@ -46,8 +68,10 @@ class qbank(object):
         self._out.close()               
 
     def subset(self, value='subject/text()', key='@id', root='//question', source=None):
-        '''returns a dict using xpath selectors.
-        default values for key and value are id and selector , respectively'''
+        '''
+        returns a dict using xpath selectors.
+        default values for key and value are id and selector , respectively
+        '''
         subset = {}
         if source == None:
             source = self._xml
@@ -59,7 +83,6 @@ class qbank(object):
         return subset
 
     def _get_list(self, contents='@id', root='//question', source=None):
-
         l=[]
         if source == None:
             source = self._xml
@@ -69,7 +92,9 @@ class qbank(object):
         return l
 
     def select_qids(self, qty=None, qlist=None):
-        '''returns a random subset of list elements, presumably question ids'''
+        '''
+        returns a random subset of list elements, presumably question ids
+        '''
         l = []
         if qty == None:
             qty = self.max_qs
@@ -81,7 +106,9 @@ class qbank(object):
         return l            
 
     def get_qs_from_ids(self, qlist=None, selector='@id', root='//question', source=None):
-        '''returns list of questions as etree Elements based on the list of id's given'''
+        '''
+        returns list of questions as etree Elements based on the list of id's given
+        '''
         l = []
         if qlist == None:
             qlist = self._qids
@@ -93,9 +120,11 @@ class qbank(object):
         return l
 
     def counts(self, c):
-        '''c is the dict to be counted
+        '''
+        c is the dict to be counted
         inverts a dict, value is a list of keys that had that value
-        used for finding subsets for e.g. subject selection'''
+        used for finding subsets for e.g. subject selection
+        '''
         counts = {}
         valueset = set(c.values())
         for i in valueset:
@@ -110,7 +139,9 @@ class qbank(object):
         return subj_counts
 
     def subject_HTML(self, counts):
-        '''convenience function for rendering index page with checkbox selectors for each subject.'''
+        '''
+        convenience function for rendering index page with checkbox selectors for each subject.
+        '''
         HTML = ''
         for i in counts.viewitems():
             HTML += '''<input type="checkbox" name="select" value="%s" />%20s : %10s<br />
