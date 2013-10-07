@@ -48,7 +48,7 @@
             $.ajax({
                 type: "POST",
                 url: "send",
-                data: JSON.stringify(record),
+                data: JSON.stringify(record)
             });
         });
     });

@@ -174,7 +174,17 @@ class qbank(object):
         self._qids = l
         print "self._qids is length "+str(len(self._qids))
         self._test = self.make_test()
-        
+
+    def _clean_JSON(self, data):
+        #jquery sends the JSON data as a dict.
+        #the key is the actual list of events, that's all we want
+        #the value is null, so this can be discarded
+        #overbuilt, in case there are multiple strings that need concatenation
+        d = data.keys()
+        r = d.pop()
+        while d:
+            r += ","+d.pop()
+        return r
 
 class Root(object):
     def __init__(self, xmlfile='testdata.xml', xslfile='testview.xsl'):
@@ -216,6 +226,7 @@ class Root(object):
 
 
     @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
     def send(self, **params):
         print params
         self.bank.store(params)
