@@ -25,6 +25,9 @@ class qbank(object):
         #init by random generation of a 50q test.
         #this is what will be presented, if nothing else is changed
 
+        self._subject_index = self.counts(self.subset())
+        #creates a dict with subject strings as keys and list of question ids as value
+
     def make_test(self):
         '''
         generate a random test from the _qids list
@@ -32,13 +35,16 @@ class qbank(object):
         this method may be called again to generate a new test
         returns an etree Element, with a root of "qbank" and questions as sub-elements
         '''
-        q = []
-        if len(self._qids) > self.max_qs:
-            q = E.qbank()
-            for i in self.get_qs_from_ids(self.select_qids()):
-                q.append(i)
-        else:
-            q = self._xml
+#        q = []
+#        if len(self._qids) > self.max_qs:
+#            q = E.qbank()
+#            for i in self.get_qs_from_ids(self.select_qids()):
+#                q.append(i)
+#        else:
+#            q = self._xml
+        q = E.qbank()
+        for i in self.get_qs_from_ids(self.select_qids()):
+            q.append(i)
         return q
 
     def _load(self, f):
@@ -98,6 +104,8 @@ class qbank(object):
         l = []
         if qty == None:
             qty = self.max_qs
+            if qty > len(self._qids):
+                qty = len(self._qids)
         if qlist == None:
             qlist = self._qids
         random.shuffle(qlist)
@@ -148,6 +156,25 @@ class qbank(object):
             ''' % (i[0], i[0], i[1])
         return HTML
 
+    def select_subjects(self, selections):
+        try:
+            s = selections['select']
+            print s
+        except KeyError:
+            print "No selections"
+            return
+        l = []
+        if isinstance(s, list):
+            for i in s:
+                l.append(self._subject_index[i])
+        else: 
+            l.append(self._subject_index[s])
+        l = self._flatten(l)
+        print len(l)
+        self._qids = l
+        print "self._qids is length "+str(len(self._qids))
+        self._test = self.make_test()
+        
 
 class Root(object):
     def __init__(self, xmlfile='testdata.xml', xslfile='testview.xsl'):
@@ -166,7 +193,7 @@ class Root(object):
             <body>
             <table width="400" border="1">
             <tr>
-            <form action="" method="post">
+            <form action="select_subjects" method="post">
             <td>%s</td>
             <td><input type="submit" value="Save"></td>
             </form>
@@ -179,6 +206,14 @@ class Root(object):
     @cherrypy.expose
     def test(self):
         return str(self.bank.transform())
+
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
+    def select_subjects(self, **selections):
+        print selections
+        self.bank.select_subjects(selections)
+        raise cherrypy.HTTPRedirect("/test")
+
 
     @cherrypy.expose
     def send(self, **params):
