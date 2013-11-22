@@ -6,10 +6,11 @@ from lxml.builder import E
 import os.path
 import argparse
 import random
+import json
 
 class qbank(object):
 
-    max_qs = 50
+    max_qs = 200
     
     def __init__(self, xmlfile, xslfile): 
         self._xml = self._load(xmlfile)
@@ -67,7 +68,7 @@ class qbank(object):
         '''
         writes accumulated selection/review data in raw JSON format. needs work.
         '''
-        h = E.history(str(params))
+        h = E.history(self._clean_JSON(params))
         self._xml.append(h)
         self._out = open('testhistory.xml', 'wb')
         self._out.write(etree.tostring(self._xml))
@@ -180,10 +181,13 @@ class qbank(object):
         #the key is the actual list of events, that's all we want
         #the value is null, so this can be discarded
         #overbuilt, in case there are multiple strings that need concatenation
+        j = json.JSONDecoder()
         d = data.keys()
         r = d.pop()
-        while d:
-            r += ","+d.pop()
+        if d:
+        #if there is more than one element, concatenate it
+            print "there were additional elements not handled"
+        r = j.decode(r)
         return r
 
 class Root(object):
