@@ -1,6 +1,6 @@
-.ui-tabs-vertical { width: 60em; } 
+.ui-tabs-vertical { margin-left:auto; margin-right:auto; width: 60em; height:98%; } 
 .ui-tabs-vertical .ui-tabs-nav { float: left; width: 5em; height:98%; overflow:auto; }
 .ui-tabs-vertical .ui-tabs-nav li { clear: left; width: 100%; border-bottom-width: 1px !important; border-right-width: 0 !important; margin: 0 -1px -1px 0; }
 .ui-tabs-vertical .ui-tabs-nav li a { font-size: .6em; display:block; }
 .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active { padding-bottom: 0; padding-right: 1px; border-right-width: 1px; border-right-width: 1px; }
-.ui-tabs-vertical .ui-tabs-panel { padding: 1em; float: right; width: 50em; }
+.ui-tabs-vertical .ui-tabs-panel { padding: 1em; float: right; width: 50em; height:92%; overflow:auto; }
